@@ -14,8 +14,11 @@ import logging
 import time
 import contextlib
 
+import tornado.ioloop
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
+from tornado.stack_context import NullContext
+from pyvows import Vows
 
 _next_port = 10000
 def get_unused_port():
@@ -128,7 +131,7 @@ class AsyncHTTPTestCase(AsyncTestCase):
         self.http_client.close()
         super(AsyncHTTPTestCase, self).tearDown()
 
-class TornadoAppContext(Vows.Context, AsyncHTTPTestCase):
+class TornadoContext(Vows.Context, AsyncHTTPTestCase):
     def _get_app(self):
         raise NotImplementedError()
 
