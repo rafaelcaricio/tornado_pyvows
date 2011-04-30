@@ -1,0 +1,33 @@
+Tornado_Pyvows
+--------------
+
+This project contains extensions to test Tornado apps under pyvows.
+
+TornadoContext and TornadoSubContext
+------------------------------------
+
+To test a tornado app (or handlers) use this context instead of the regular
+Vows.Context, like this:
+
+```python
+@Vows.batch
+class SomeVows(TornadoContext):
+    def _get_app(self):
+        application = tornado.web.Application([
+            (r"/", HomeHandler),
+        ])
+        return application
+
+    class HomeUrl(TornadoSubContext):
+        def topic(self):
+            self._http_client.fetch(self._get_url('/'), self._stop)
+            response = self._wait()
+            return response.body
+
+        def should_be_hello_world(self, topic):
+            expect(topic).to_equal('hello_world')
+```
+
+Note that the use of TornadoSubContext in the contained topics is VERY advised
+since it allows you to use _http_client, _get_url, _stop, _wait and other
+Tornado's testing methods without referring to parent Contexts.
