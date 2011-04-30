@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # tornado-pyvows extensions
@@ -8,4 +8,4 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 globo.com rafael@caricio.com
 
-from context import TornadoContext, TornadoSubContext
+

@@ -20,7 +20,7 @@ setup(
 tornado_pyvows are pyvows extensions to tornado web framework.
 """,
     keywords = 'testing vows test tdd',
-    author = 'Rafael Carício',
+    author = u'Rafael Caricio',
     author_email = 'rafael@caricio.com',
     #Contributors
     #contributor = 'Bernardo Heynemann',
@@ -41,6 +41,8 @@ tornado_pyvows are pyvows extensions to tornado web framework.
 
     install_requires=[
         "pyvows",
+        "tornado",
+        "pycurl",
     ],
 
 )

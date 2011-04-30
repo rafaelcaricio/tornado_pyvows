@@ -70,7 +70,7 @@ class AsyncTestCase(object):
             if timeout:
                 def timeout_func():
                     try:
-                        raise self.failureException(
+                        raise AssertionError(
                           'Async operation timed out after %d seconds' %
                           timeout)
                     except:
@@ -154,4 +154,8 @@ class TornadoSubContext(Vows.Context):
         except AttributeError:
             return self._get_parent_argument(name)
 
+    def _get(self, path):
+            self._http_client.fetch(self._get_url(path), self._stop)
+            response = self._wait()
+            return response
 
