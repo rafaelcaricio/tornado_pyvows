@@ -15,3 +15,7 @@ from tornado.web import RequestHandler
 class MainPageHandler(RequestHandler):
     def get(self):
         self.write("Hello, world")
+
+    def post(self):
+        self.set_header("Content-Type", "application/json")
+        self.write("{\"message\":\"Hello, world\"")

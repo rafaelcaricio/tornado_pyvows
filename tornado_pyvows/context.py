@@ -13,6 +13,7 @@ import os
 import logging
 import time
 import contextlib
+import urllib
 
 import tornado.ioloop
 from tornado.httpclient import AsyncHTTPClient
@@ -112,7 +113,7 @@ class AsyncHTTPTestCase(AsyncTestCase):
         raise NotImplementedError()
 
     def _fetch(self, path, **kwargs):
-        self.http_client.fetch(self.get_url(path), self._stop, **kwargs)
+        self._http_client.fetch(self._get_url(path), self._stop, **kwargs)
         return self._wait()
 
     def _get_httpserver_options(self):
@@ -130,6 +131,15 @@ class AsyncHTTPTestCase(AsyncTestCase):
         self.http_server._stop()
         self.http_client.close()
         super(AsyncHTTPTestCase, self).tearDown()
+
+class HttpResponseMiddleware(object):
+    def __init__(self, real_response):
+        self.code = real_response.code
+        self.body = real_response.body
+        self.error = real_response.error
+        self.headers = real_response.headers
+        self.request_time = real_response.request_time
+        self.time_info = real_response.time_info
 
 class TornadoContext(Vows.Context, AsyncHTTPTestCase):
     def _get_app(self):
@@ -155,7 +165,7 @@ class TornadoSubContext(Vows.Context):
             return self._get_parent_argument(name)
 
     def _get(self, path):
-            self._http_client.fetch(self._get_url(path), self._stop)
-            response = self._wait()
-            return response
+        return HttpResponseMiddleware(self._fetch(path, method="GET"))
 
+    def _post(self, path, data={}):
+        return HttpResponseMiddleware(self._fetch(path, method="POST", body=urllib.urlencode(data)))

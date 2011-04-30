@@ -27,7 +27,18 @@ class Application(TornadoContext):
     class HomeUrlBody(TornadoSubContext):
 
         def topic(self):
-            return self._get('/').body
+            return self._get('/')
 
         def should_be_hello_world(self, topic):
-            expect(topic).to_equal('Hello, world')
+            expect(topic.body).to_equal('Hello, world')
+
+    class WhenPostWithoutData(TornadoSubContext):
+
+        def topic(self):
+            return self._post('/')
+
+        def the_response_should_be_ok(self, topic):
+            expect(topic.code).to_equal(200)
+
+        def the_response_should_be_json(self, topic):
+            expect(topic.body).to_equal("{\"message\":\"Hello, world\"")
