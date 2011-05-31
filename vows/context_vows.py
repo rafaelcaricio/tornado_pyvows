@@ -6,7 +6,7 @@
 
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/mit-license
-# Copyright (c) 2011 globo.com rafael@caricio.com
+# Copyright (c) 2011 Rafael Caricio rafael@caricio.com
 
 
 import tornado.web
