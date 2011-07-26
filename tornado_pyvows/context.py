@@ -141,7 +141,11 @@ class HttpResponseMiddleware(object):
         self.request_time = real_response.request_time
         self.time_info = real_response.time_info
 
-class TornadoContext(Vows.Context, AsyncHTTPTestCase):
+class TornadoContext(Vows.Context, AsyncTestCase):
+    def topic(self):
+        self._setUp()
+
+class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase):
     def _get_app(self):
         raise NotImplementedError()
 
