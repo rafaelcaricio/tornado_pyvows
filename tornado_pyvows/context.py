@@ -19,15 +19,8 @@ import tornado.ioloop
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 from tornado.stack_context import NullContext
+from tornado.testing import get_unused_port
 from pyvows import Vows
-
-_next_port = 10000
-def get_unused_port():
-    """Returns a (hopefully) unused port number."""
-    global _next_port
-    port = _next_port
-    _next_port = _next_port + 1
-    return port
 
 class AsyncTestCase(object):
 
