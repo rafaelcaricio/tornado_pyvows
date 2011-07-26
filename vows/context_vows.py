@@ -12,12 +12,12 @@
 import tornado.web
 
 from pyvows import Vows, expect
-from tornado_pyvows import TornadoContext, TornadoSubContext
+from tornado_pyvows import TornadoHTTPContext, TornadoSubContext
 
 from vows.test_app import MainPageHandler
 
 @Vows.batch
-class Application(TornadoContext):
+class Application(TornadoHTTPContext):
     def _get_app(self):
         application = tornado.web.Application([
             (r"/", MainPageHandler),
