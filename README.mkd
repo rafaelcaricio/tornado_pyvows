@@ -11,7 +11,7 @@ Vows.Context, like this:
 
 ```python
 @Vows.batch
-class SomeVows(TornadoContext):
+class SomeVows(TornadoHTTPContext):
     def _get_app(self):
         application = tornado.web.Application([
             (r"/", HomeHandler),
