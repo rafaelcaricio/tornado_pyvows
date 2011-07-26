@@ -19,15 +19,8 @@ import tornado.ioloop
 from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 from tornado.stack_context import NullContext
+from tornado.testing import get_unused_port
 from pyvows import Vows
-
-_next_port = 10000
-def get_unused_port():
-    """Returns a (hopefully) unused port number."""
-    global _next_port
-    port = _next_port
-    _next_port = _next_port + 1
-    return port
 
 class AsyncTestCase(object):
 
@@ -132,16 +125,11 @@ class AsyncHTTPTestCase(AsyncTestCase):
         self.http_client.close()
         super(AsyncHTTPTestCase, self).tearDown()
 
-class HttpResponseMiddleware(object):
-    def __init__(self, real_response):
-        self.code = real_response.code
-        self.body = real_response.body
-        self.error = real_response.error
-        self.headers = real_response.headers
-        self.request_time = real_response.request_time
-        self.time_info = real_response.time_info
+class TornadoContext(Vows.Context, AsyncTestCase):
+    def topic(self):
+        self._setUp()
 
-class TornadoContext(Vows.Context, AsyncHTTPTestCase):
+class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase):
     def _get_app(self):
         raise NotImplementedError()
 
@@ -165,7 +153,7 @@ class TornadoSubContext(Vows.Context):
             return self._get_parent_argument(name)
 
     def _get(self, path):
-        return HttpResponseMiddleware(self._fetch(path, method="GET"))
+        return self._fetch(path, method="GET")
 
     def _post(self, path, data={}):
-        return HttpResponseMiddleware(self._fetch(path, method="POST", body=urllib.urlencode(data)))
+        return self._fetch(path, method="POST", body=urllib.urlencode(data))
