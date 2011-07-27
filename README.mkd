@@ -18,7 +18,7 @@ class SomeVows(TornadoHTTPContext):
         ])
         return application
 
-    class HomeUrl(TornadoSubContext):
+    class HomeUrl(TornadoHTTPContext):
         def topic(self):
             self._http_client.fetch(self._get_url('/'), self._stop)
             response = self._wait()
@@ -28,6 +28,5 @@ class SomeVows(TornadoHTTPContext):
             expect(topic).to_equal('hello_world')
 ```
 
-Note that the use of TornadoSubContext in the contained topics is VERY advised
-since it allows you to use _http_client, _get_url, _stop, _wait and other
-Tornado's testing methods without referring to parent Contexts.
+Each `TornadoHTTPContext` provides Tornado's testing methods like
+`_http_client`, `_get_url`, `_stop`, `_wait`, `_fetch` and others.
