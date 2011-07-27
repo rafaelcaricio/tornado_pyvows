@@ -61,7 +61,7 @@ Contributions are very welcome. To contribute fork it and create a pull request.
 
 The team behind Tornado_pyVows (in order of joining the project):
 
- - Rafael Carício @rafaelcaricio
- - Bernardo Heynemann @heynemann
- - Daniel Truemper @truemper
+ - Rafael Carício [@rafaelcaricio](https://github.com/rafaelcaricio)
+ - Bernardo Heynemann [@heynemann](https://github.com/heynemann)
+ - Daniel Truemper [@truemperd](https://github.com/truemped)
 
