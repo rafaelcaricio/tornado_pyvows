@@ -125,18 +125,8 @@ class AsyncHTTPTestCase(AsyncTestCase):
         self.http_client.close()
         super(AsyncHTTPTestCase, self).tearDown()
 
-class TornadoContext(Vows.Context, AsyncTestCase):
-    def topic(self):
-        self._setUp()
+class ParentAttributeMixin(object):
 
-class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase):
-    def _get_app(self):
-        raise NotImplementedError()
-
-    def topic(self):
-        self._setUp()
-
-class TornadoSubContext(Vows.Context):
     def _get_parent_argument(self, name):
         parent = self.parent
         while parent:
@@ -151,6 +141,20 @@ class TornadoSubContext(Vows.Context):
             return object.__getattribute__(self, name)
         except AttributeError:
             return self._get_parent_argument(name)
+
+
+class TornadoContext(Vows.Context, ParentAttributeMixin, AsyncTestCase):
+
+    def topic(self):
+        self._setUp()
+
+class TornadoHTTPContext(Vows.Context, ParentAttributeMixin, AsyncHTTPTestCase):
+
+    def _get_app(self):
+        raise NotImplementedError()
+
+    def topic(self):
+        self._setUp()
 
     def _get(self, path):
         return self._fetch(path, method="GET")
