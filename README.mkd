@@ -3,8 +3,8 @@ Tornado_Pyvows
 
 This project contains extensions to test Tornado apps under pyvows.
 
-TornadoContext and TornadoSubContext
-------------------------------------
+TornadoHTTPContext
+------------------
 
 To test a tornado app (or handlers) use this context instead of the regular
 Vows.Context, like this:
