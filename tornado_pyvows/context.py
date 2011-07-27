@@ -145,16 +145,21 @@ class ParentAttributeMixin(object):
 
 class TornadoContext(Vows.Context, ParentAttributeMixin, AsyncTestCase):
 
-    def topic(self):
-        self._setUp()
+    def __init__(self, parent):
+        super(TornadoContext, self).__init__(parent)
+        if not parent:
+            self._setUp()
+
 
 class TornadoHTTPContext(Vows.Context, ParentAttributeMixin, AsyncHTTPTestCase):
 
+    def __init__(self, parent):
+        super(TornadoHTTPContext, self).__init__(parent)
+        if not parent:
+            self._setUp()
+
     def _get_app(self):
         raise NotImplementedError()
-
-    def topic(self):
-        self._setUp()
 
     def _get(self, path):
         return self._fetch(path, method="GET")
