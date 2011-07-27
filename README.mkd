@@ -1,7 +1,7 @@
-Tornado_Pyvows
---------------
+Tornado_pyVows
+==============
 
-This project contains extensions to test Tornado apps under pyvows.
+This project contains extensions to test Tornado apps under pyVows.
 
 TornadoHTTPContext
 ------------------
@@ -53,3 +53,15 @@ class AsyncVows(TornadoContext):
         def andHaveTheCorrectResult(self, topic):
             expect(topic).to_equal("Pseudo Async Result")
 ```
+
+Contributors
+============
+
+Contributions are very welcome. To contribute fork it and create a pull request.
+
+The team behind Tornado_pyVows (in order of joining the project):
+
+ - Rafael Carício @rafaelcaricio
+ - Bernardo Heynemann @heynemann
+ - Daniel Truemper @truemper
+
