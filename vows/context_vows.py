@@ -12,7 +12,7 @@
 import tornado.web
 
 from pyvows import Vows, expect
-from tornado_pyvows import TornadoHTTPContext, TornadoSubContext
+from tornado_pyvows import TornadoHTTPContext
 
 from vows.test_app import MainPageHandler
 
@@ -24,7 +24,7 @@ class Application(TornadoHTTPContext):
         ])
         return application
 
-    class HomeUrlBody(TornadoSubContext):
+    class HomeUrlBody(TornadoHTTPContext):
 
         def topic(self):
             return self._get('/')
@@ -32,7 +32,7 @@ class Application(TornadoHTTPContext):
         def should_be_hello_world(self, topic):
             expect(topic.body).to_equal('Hello, world')
 
-    class WhenPostWithoutData(TornadoSubContext):
+    class WhenPostWithoutData(TornadoHTTPContext):
 
         def topic(self):
             return self._post('/')
