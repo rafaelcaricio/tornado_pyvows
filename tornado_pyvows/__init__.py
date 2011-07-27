@@ -7,4 +7,4 @@
 # Licensed under the MIT license:
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 globo.com rafael@caricio.com
-from .context import TornadoContext, TornadoHTTPContext, TornadoSubContext
+from .context import TornadoContext, TornadoHTTPContext

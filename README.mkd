@@ -3,8 +3,8 @@ Tornado_Pyvows
 
 This project contains extensions to test Tornado apps under pyvows.
 
-TornadoContext and TornadoSubContext
-------------------------------------
+TornadoHTTPContext
+------------------
 
 To test a tornado app (or handlers) use this context instead of the regular
 Vows.Context, like this:
@@ -18,7 +18,7 @@ class SomeVows(TornadoHTTPContext):
         ])
         return application
 
-    class HomeUrl(TornadoSubContext):
+    class HomeUrl(TornadoHTTPContext):
         def topic(self):
             self._http_client.fetch(self._get_url('/'), self._stop)
             response = self._wait()
@@ -28,6 +28,28 @@ class SomeVows(TornadoHTTPContext):
             expect(topic).to_equal('hello_world')
 ```
 
-Note that the use of TornadoSubContext in the contained topics is VERY advised
-since it allows you to use _http_client, _get_url, _stop, _wait and other
-Tornado's testing methods without referring to parent Contexts.
+Each `TornadoHTTPContext` provides Tornado's testing methods like
+`_http_client`, `_get_url`, `_stop`, `_wait`, `_fetch` and others.
+
+TornadoContext
+--------------
+
+If you want to test a tornado based app without the HTTP overhead you may also
+use the `TornadoContext`:
+
+```python
+def asyncMethod(callback):
+    callback("Pseudo Async Result")
+
+@Vows.batch
+class AsyncVows(TornadoContext):
+
+    class CallbacksShouldWork(TornadoContext):
+
+        def topic(self):
+            self.io_loop.add_callback(partial(asyncMethod, self._stop))
+            return self._wait()
+
+        def andHaveTheCorrectResult(self, topic):
+            expect(topic).to_equal("Pseudo Async Result")
+```
