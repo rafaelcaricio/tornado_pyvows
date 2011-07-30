@@ -8,13 +8,15 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 globo.com rafael@caricio.com
 
-
+import os
 from setuptools import setup
-from tornado_pyvows.version import __version__
+from imp import load_source
+
+version = load_source('version', os.path.join("tornado_pyvows", "version.py"))
 
 setup(
     name = 'tornado_pyvows',
-    version = '.'.join([str(item) for item in __version__]),
+    version = '.'.join([str(item) for item in version.__version__]),
     description = "tornado_pyvows are pyvows extensions to tornado web framework.",
     long_description = """
 tornado_pyvows are pyvows extensions to tornado web framework.
