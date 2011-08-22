@@ -12,7 +12,8 @@ Vows.Context, like this:
 ```python
 @Vows.batch
 class SomeVows(TornadoHTTPContext):
-    def _get_app(self):
+
+    def get_app(self):
         application = tornado.web.Application([
             (r"/", HomeHandler),
         ])
@@ -20,8 +21,8 @@ class SomeVows(TornadoHTTPContext):
 
     class HomeUrl(TornadoHTTPContext):
         def topic(self):
-            self._http_client.fetch(self._get_url('/'), self._stop)
-            response = self._wait()
+            self.http_client.fetch(self.get_url('/'), self.stop)
+            response = self.wait()
             return response.body
 
         def should_be_hello_world(self, topic):
@@ -29,7 +30,7 @@ class SomeVows(TornadoHTTPContext):
 ```
 
 Each `TornadoHTTPContext` provides Tornado's testing methods like
-`_http_client`, `_get_url`, `_stop`, `_wait`, `_fetch` and others.
+`http_client`, `get_url`, `stop`, `wait`, `fetch` and others.
 
 TornadoContext
 --------------
@@ -47,8 +48,8 @@ class AsyncVows(TornadoContext):
     class CallbacksShouldWork(TornadoContext):
 
         def topic(self):
-            self.io_loop.add_callback(partial(asyncMethod, self._stop))
-            return self._wait()
+            self.io_loop.add_callback(partial(asyncMethod, self.stop))
+            return self.wait()
 
         def andHaveTheCorrectResult(self, topic):
             expect(topic).to_equal("Pseudo Async Result")
