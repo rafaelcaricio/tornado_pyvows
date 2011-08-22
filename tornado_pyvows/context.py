@@ -97,13 +97,11 @@ class AsyncHTTPTestCase(AsyncTestCase):
         self.port = None
 
         self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
-        self.app = self.get_app()
-        self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
-                                      **self.get_httpserver_options())
-        self.http_server.listen(self.get_http_port())
-
-    def get_app(self):
-        raise NotImplementedError()
+        if hasattr(self, 'get_app'):
+            self.app = self.get_app()
+            self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
+                                          **self.get_httpserver_options())
+            self.http_server.listen(self.get_http_port())
 
     def fetch(self, path, **kwargs):
         self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
@@ -162,19 +160,15 @@ class TornadoHTTPContext(Vows.Context, ParentAttributeMixin, AsyncHTTPTestCase):
     def __init__(self, parent, *args, **kwargs):
         Vows.Context.__init__(self, parent)
         ParentAttributeMixin.__init__(self)
-        AsyncHTTPTestCase(*args, **kwargs)
+        AsyncHTTPTestCase.__init__(self, *args, **kwargs)
 
-        if 'get_app' in self.__dict__:
-            self.setUp()
+        self.setUp()
 
         self.ignore('get_parent_argument', 'setUp', 
                     'get_app', 'fetch', 'get_httpserver_options', 
                     'get_http_port', 'get_url', 'tearDown',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait',
                     'get', 'post')
-
-    def get_app(self):
-        raise NotImplementedError()
 
     def get(self, path):
         return self.fetch(path, method="GET")
