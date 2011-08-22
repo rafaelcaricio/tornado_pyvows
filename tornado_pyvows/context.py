@@ -24,10 +24,10 @@ from pyvows import Vows
 
 class AsyncTestCase(object):
 
-    def _setUp(self):
-        self.io_loop = self._get_new_ioloop()
+    def setUp(self):
+        self.io_loop = self.get_new_ioloop()
 
-    def _tearDown(self):
+    def tearDown(self):
         if self.io_loop is not tornado.ioloop.IOLoop.instance():
             for fd in self.io_loop._handlers.keys()[:]:
                 if (fd == self.io_loop._waker_reader.fileno() or
@@ -40,27 +40,27 @@ class AsyncTestCase(object):
             self.io_loop._waker_reader.close()
             self.io_loop._waker_writer.close()
 
-    def _get_new_ioloop(self):
+    def get_new_ioloop(self):
         return tornado.ioloop.IOLoop()
 
     @contextlib.contextmanager
-    def _stack_context(self):
+    def stack_context(self):
         try:
             yield
         except:
-            self._failure = sys.exc_info()
+            self.failure = sys.exc_info()
             self.stop()
 
-    def _stop(self, _arg=None, **kwargs):
+    def stop(self, _arg=None, **kwargs):
         assert _arg is None or not kwargs
-        self._stop_args = kwargs or _arg
-        if self._running:
+        self.stop_args = kwargs or _arg
+        if self.running:
             self.io_loop.stop()
-            self._running = False
-        self._stopped = True
+            self.running = False
+        self.stopped = True
 
-    def _wait(self, condition=None, timeout=5):
-        if not self._stopped:
+    def wait(self, condition=None, timeout=5):
+        if not self.stopped:
             if timeout:
                 def timeout_func():
                     try:
@@ -68,66 +68,64 @@ class AsyncTestCase(object):
                           'Async operation timed out after %d seconds' %
                           timeout)
                     except:
-                        self._failure = sys.exc_info()
-                    self._stop()
+                        self.failure = sys.exc_info()
+                    self.stop()
                 self.io_loop.add_timeout(time.time() + timeout, timeout_func)
             while True:
-                self._running = True
+                self.running = True
                 with NullContext():
                     self.io_loop.start()
-                if (self._failure is not None or
+                if (self.failure is not None or
                     condition is None or condition()):
                     break
-        assert self._stopped
-        self._stopped = False
-        if self._failure is not None:
-            raise self._failure[0], self._failure[1], self._failure[2]
-        result = self._stop_args
-        self._stop_args = None
+        assert self.stopped
+        self.stopped = False
+        if self.failure is not None:
+            raise self.failure[0], self.failure[1], self.failure[2]
+        result = self.stop_args
+        self.stop_args = None
         return result
 
 class AsyncHTTPTestCase(AsyncTestCase):
-    def _setUp(self):
-        self._stopped = False
-        self._running = False
-        self._failure = None
-        self._stop_args = None
+    def setUp(self):
+        self.stopped = False
+        self.running = False
+        self.failure = None
+        self.stop_args = None
 
-        super(AsyncHTTPTestCase, self)._setUp()
-        self._port = None
+        super(AsyncHTTPTestCase, self).setUp()
+        self.port = None
 
-        self._http_client = AsyncHTTPClient(io_loop=self.io_loop)
-        self._app = self._get_app()
-        self._http_server = HTTPServer(self._app, io_loop=self.io_loop,
-                                      **self._get_httpserver_options())
-        self._http_server.listen(self._get_http_port())
+        self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
+        if hasattr(self, 'get_app'):
+            self.app = self.get_app()
+            self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
+                                          **self.get_httpserver_options())
+            self.http_server.listen(self.get_http_port())
 
-    def _get_app(self):
-        raise NotImplementedError()
+    def fetch(self, path, **kwargs):
+        self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
+        return self.wait()
 
-    def _fetch(self, path, **kwargs):
-        self._http_client.fetch(self._get_url(path), self._stop, **kwargs)
-        return self._wait()
-
-    def _get_httpserver_options(self):
+    def get_httpserver_options(self):
         return {}
 
-    def _get_http_port(self):
-        if self._port is None:
-            self._port = get_unused_port()
-        return self._port
+    def get_http_port(self):
+        if self.port is None:
+            self.port = get_unused_port()
+        return self.port
 
-    def _get_url(self, path):
-        return 'http://localhost:%s%s' % (self._get_http_port(), path)
+    def get_url(self, path):
+        return 'http://localhost:%s%s' % (self.get_http_port(), path)
 
-    def _tearDown(self):
-        self.http_server._stop()
+    def tearDown(self):
+        self.http_server.stop()
         self.http_client.close()
         super(AsyncHTTPTestCase, self).tearDown()
 
 class ParentAttributeMixin(object):
 
-    def _get_parent_argument(self, name):
+    def get_parent_argument(self, name):
         parent = self.parent
         while parent:
             if hasattr(parent, name):
@@ -140,29 +138,40 @@ class ParentAttributeMixin(object):
         try:
             return object.__getattribute__(self, name)
         except AttributeError:
-            return self._get_parent_argument(name)
+            return self.get_parent_argument(name)
 
 
 class TornadoContext(Vows.Context, ParentAttributeMixin, AsyncTestCase):
 
-    def __init__(self, parent):
-        super(TornadoContext, self).__init__(parent)
-        if not parent:
-            self._setUp()
+    def __init__(self, parent, *args, **kwargs):
+        Vows.Context.__init__(self, parent)
+        ParentAttributeMixin.__init__(self)
+        AsyncTestCase(*args, **kwargs)
+
+        self.setUp()
+        self.ignore('get_parent_argument', 'setUp', 
+                    'get_app', 'fetch', 'get_httpserver_options', 
+                    'get_http_port', 'get_url', 'tearDown',
+                    'get_new_ioloop', 'stack_context', 'stop', 'wait')
 
 
 class TornadoHTTPContext(Vows.Context, ParentAttributeMixin, AsyncHTTPTestCase):
 
-    def __init__(self, parent):
-        super(TornadoHTTPContext, self).__init__(parent)
-        if not parent:
-            self._setUp()
+    def __init__(self, parent, *args, **kwargs):
+        Vows.Context.__init__(self, parent)
+        ParentAttributeMixin.__init__(self)
+        AsyncHTTPTestCase.__init__(self, *args, **kwargs)
 
-    def _get_app(self):
-        raise NotImplementedError()
+        self.setUp()
 
-    def _get(self, path):
-        return self._fetch(path, method="GET")
+        self.ignore('get_parent_argument', 'setUp', 
+                    'get_app', 'fetch', 'get_httpserver_options', 
+                    'get_http_port', 'get_url', 'tearDown',
+                    'get_new_ioloop', 'stack_context', 'stop', 'wait',
+                    'get', 'post')
 
-    def _post(self, path, data={}):
-        return self._fetch(path, method="POST", body=urllib.urlencode(data))
+    def get(self, path):
+        return self.fetch(path, method="GET")
+
+    def post(self, path, data={}):
+        return self.fetch(path, method="POST", body=urllib.urlencode(data))
