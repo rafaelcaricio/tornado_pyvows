@@ -174,4 +174,4 @@ class TornadoHTTPContext(Vows.Context, ParentAttributeMixin, AsyncHTTPTestCase):
         return self.fetch(path, method="GET")
 
     def post(self, path, data={}):
-        return self.fetch(path, method="POST", body=urllib.urlencode(data))
+        return self.fetch(path, method="POST", body=urllib.urlencode(data, doseq=True))
