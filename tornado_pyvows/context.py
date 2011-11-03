@@ -24,22 +24,6 @@ from pyvows import Vows
 
 class AsyncTestCase(object):
 
-    def setUp(self):
-        self.io_loop = self.get_new_ioloop()
-
-    def tearDown(self):
-        if self.io_loop is not tornado.ioloop.IOLoop.instance():
-            for fd in self.io_loop._handlers.keys()[:]:
-                if (fd == self.io_loop._waker_reader.fileno() or
-                    fd == self.io_loop._waker_writer.fileno()):
-                    continue
-                try:
-                    os.close(fd)
-                except:
-                    logging.debug("error closing fd %d", fd, exc_info=True)
-            self.io_loop._waker_reader.close()
-            self.io_loop._waker_writer.close()
-
     def get_new_ioloop(self):
         return tornado.ioloop.IOLoop()
 
@@ -87,21 +71,20 @@ class AsyncTestCase(object):
         return result
 
 class AsyncHTTPTestCase(AsyncTestCase):
-    def setUp(self):
+    def setup(self):
         self.stopped = False
         self.running = False
         self.failure = None
         self.stop_args = None
 
-        super(AsyncHTTPTestCase, self).setUp()
-        self.port = None
-
         self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
-        if hasattr(self, 'get_app'):
+        if 'get_app' in dir(self.__class__):
+            self.io_loop = self.get_new_ioloop()
+            self.port = get_unused_port()
             self.app = self.get_app()
             self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
                                           **self.get_httpserver_options())
-            self.http_server.listen(self.get_http_port())
+            self.http_server.listen(self.port)
 
     def fetch(self, path, **kwargs):
         self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
@@ -110,18 +93,15 @@ class AsyncHTTPTestCase(AsyncTestCase):
     def get_httpserver_options(self):
         return {}
 
-    def get_http_port(self):
-        if self.port is None:
-            self.port = get_unused_port()
-        return self.port
-
     def get_url(self, path):
-        return 'http://localhost:%s%s' % (self.get_http_port(), path)
+        url = 'http://localhost:%s%s' % (self.port, path)
+        return url
 
-    def tearDown(self):
-        self.http_server.stop()
-        self.http_client.close()
-        super(AsyncHTTPTestCase, self).tearDown()
+    def teardown(self):
+        if 'http_server' in dir(self.__class__):
+            self.http_server.stop()
+        if 'http_client' in dir(self.__class__):
+            self.http_client.close()
 
 class ParentAttributeMixin(object):
 
@@ -141,34 +121,37 @@ class ParentAttributeMixin(object):
             return self.get_parent_argument(name)
 
 
-class TornadoContext(Vows.Context, ParentAttributeMixin, AsyncTestCase):
+class TornadoContext(Vows.Context, AsyncTestCase, ParentAttributeMixin):
 
     def __init__(self, parent, *args, **kwargs):
         Vows.Context.__init__(self, parent)
         ParentAttributeMixin.__init__(self)
         AsyncTestCase(*args, **kwargs)
 
-        self.setUp()
-        self.ignore('get_parent_argument', 'setUp', 
-                    'get_app', 'fetch', 'get_httpserver_options', 
-                    'get_http_port', 'get_url', 'tearDown',
+        self.ignore('get_parent_argument',
+                    'get_app', 'fetch', 'get_httpserver_options',
+                    'get_url',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait')
 
 
-class TornadoHTTPContext(Vows.Context, ParentAttributeMixin, AsyncHTTPTestCase):
+class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
 
     def __init__(self, parent, *args, **kwargs):
         Vows.Context.__init__(self, parent)
         ParentAttributeMixin.__init__(self)
         AsyncHTTPTestCase.__init__(self, *args, **kwargs)
 
-        self.setUp()
-
-        self.ignore('get_parent_argument', 'setUp', 
-                    'get_app', 'fetch', 'get_httpserver_options', 
-                    'get_http_port', 'get_url', 'tearDown',
+        self.ignore('get_parent_argument',
+                    'get_app', 'fetch', 'get_httpserver_options',
+                    'get_url',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait',
                     'get', 'post')
+
+    def setup(self):
+        AsyncHTTPTestCase.setup(self)
+
+    def teardown(self):
+        AsyncHTTPTestCase.teardown(self)
 
     def get(self, path):
         return self.fetch(path, method="GET")
