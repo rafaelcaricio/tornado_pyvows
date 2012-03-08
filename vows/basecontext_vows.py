@@ -13,9 +13,8 @@ from pyvows import Vows, expect
 from tornado_pyvows import TornadoContext
 
 
-def asyncMethod(callback):
+def async_method(callback):
     callback("Pseudo Async Result")
-
 
 @Vows.batch
 class AsyncVows(TornadoContext):
@@ -24,8 +23,8 @@ class AsyncVows(TornadoContext):
 
         def topic(self):
             self.io_loop = self.get_new_ioloop()
-            self.io_loop.add_callback(partial(asyncMethod, self.stop))
+            self.io_loop.add_callback(partial(async_method, self.stop))
             return self.wait()
 
-        def andHaveTheCorrectResult(self, topic):
+        def and_have_the_correct_result(self, topic):
             expect(topic).to_equal("Pseudo Async Result")
