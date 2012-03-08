@@ -8,6 +8,7 @@
 # http://www.opensource.org/licenses/mit-license
 # Copyright (c) 2011 Rafael Caricio rafael@caricio.com
 
+import json
 
 import tornado.web
 
@@ -24,21 +25,110 @@ class Application(TornadoHTTPContext):
         ])
         return application
 
-    class HomeUrlBody(TornadoHTTPContext):
+    class GoodRequest(TornadoHTTPContext):
 
         def topic(self):
-            return self.get('/')
-
-        def should_be_hello_world(self, topic):
-            expect(topic.body).to_equal('Hello, world')
-
-    class WhenPostWithoutData(TornadoHTTPContext):
-
-        def topic(self):
-            return self.post('/')
+            return (200, None, self.get('/'))
 
         def the_response_should_be_ok(self, topic):
-            expect(topic.code).to_equal(200)
+            expected_code, _, response = topic
+            expect(response.code).to_equal(expected_code)
 
-        def the_response_should_be_json(self, topic):
-            expect(topic.body).to_equal("{\"message\":\"Hello, world\"")
+    class HomeUrlBody(GoodRequest):
+
+        def should_be_hello_world(self, topic):
+            _, _, response = topic
+            expect(response.body).to_equal('Hello, world')
+
+    class WhenPostWithUrlEncodedFormData(GoodRequest):
+
+        def topic(self):
+            data = {'message':'Hello UrlEncoded Form'}
+            return (200, data, self.post('/', data=data))
+
+        def the_response_should_be_the_input(self, topic):
+            _, data, response = topic
+            expect(response.body).to_equal(json.dumps(data))
+        
+    class WhenPostWithMultipartFormData(WhenPostWithUrlEncodedFormData):
+
+        def topic(self):
+            data = {'message':'Hello Multipart Form'}
+            return (200, data, self.post('/', data=data, multipart=True))
+    
+    class WhenPostWithFileUpload(GoodRequest):
+
+        def topic(self):
+            data = {'upload': ('the_file_name', 
+                'This is the file content!')}
+            return (200, data, self.post('/', data=data, multipart=True))
+
+        def the_response_should_contain_upload(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)
+            expect(body).to_include('upload')
+
+        def the_response_should_contain_filename(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)['upload']
+            expect(body).to_include('filename')
+
+        def the_filename_should_be_the_same(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)['upload']
+            expect(body['filename']).to_include('the_file_name')
+
+        def the_file_should_have_the_same_content(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)['upload']['body']
+            expect(body).to_equal('This is the file content!')
+
+    class WhenPostWithMultipleFiles(WhenPostWithFileUpload):
+
+        def topic(self):
+            data = {'upload': 
+                    ('the_file_name', 'This is the file content!'),
+                    'second_file': ('other_file_name', 'Different content')
+                    }
+            return (200, data, self.post('/', data=data, multipart=True))
+        
+        def the_response_should_contain_second_file(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)
+            expect(body).to_include('second_file')
+
+        def the_response_should_contain_filename(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)['second_file']
+            expect(body).to_include('filename')
+
+        def the_second_filename_should_be_the_same(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)['second_file']
+            expect(body['filename']).to_include('other_file_name')
+
+        def the_content_of_the_second_file_should_be_the_same(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)['second_file']['body']
+            expect(body).to_equal('Different content')
+
+    class WhenPostWithFileUploadAndArguments(WhenPostWithFileUpload):
+
+        def topic(self):
+            data = {'upload': 
+                    ('the_file_name', 'This is the file content!'),
+                    'argument':'value'
+                    }
+            return (200, data, self.post('/', data=data, multipart=True))
+        
+        def the_response_should_contain_argument(self, topic):
+            _, _, response = topic
+            body = json.loads(response.body)
+            expect(body).to_include('argument')
+
+        def the_argument_should_have_value(self, topic):
+            _, _, response = topic
+            argument = json.loads(response.body)['argument']
+            expect(argument).to_equal('value')
+
+

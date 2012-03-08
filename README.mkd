@@ -10,6 +10,18 @@ To test a tornado app (or handlers) use this context instead of the regular
 Vows.Context, like this:
 
 ```python
+import tornado
+
+class HomeHandler(tornado.web.RequestHandler):
+    
+    def get(self):
+        self.write("hello_world")
+
+    def post(self):
+        self.write("hello_world")
+
+from pyvows import Context, expect
+
 @Vows.batch
 class SomeVows(TornadoHTTPContext):
 
@@ -26,11 +38,25 @@ class SomeVows(TornadoHTTPContext):
             return response.body
 
         def should_be_hello_world(self, topic):
-            expect(topic).to_equal('hello_world')
+            expect(topic).to_equal("hello_world")
+
+    class SameUrl(HomeUrl):
+        def topic(self):
+            """
+            For convenience you can also use ``get`` and ``post`` to wrap the 
+            calls to the ``http_client``.
+            """
+            response = self.get("/")
+            return response.body
+
+    class SimplePost(HomeUrl):
+        def topic(self):
+            response = self.post("/")
+            return response.body
 ```
 
 Each `TornadoHTTPContext` provides Tornado's testing methods like
-`http_client`, `get_url`, `stop`, `wait`, `fetch` and others.
+`http_client`, `get_url`, `stop`, `wait`, `fetch` and others. 
 
 TornadoContext
 --------------
@@ -64,5 +90,5 @@ The team behind Tornado_pyVows (in order of joining the project):
 
  - Rafael Carício [@rafaelcaricio](https://github.com/rafaelcaricio)
  - Bernardo Heynemann [@heynemann](https://github.com/heynemann)
- - Daniel Truemper [@truemperd](https://github.com/truemped)
+ - Daniel Truemper [@truemped](https://github.com/truemped)
 

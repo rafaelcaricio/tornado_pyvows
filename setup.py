@@ -45,6 +45,7 @@ tornado_pyvows are pyvows extensions to tornado web framework.
         "pyvows",
         "tornado",
         "pycurl",
+        "urllib3"
     ],
 
 )
