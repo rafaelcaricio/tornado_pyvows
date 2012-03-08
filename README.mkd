@@ -78,7 +78,7 @@ class AsyncVows(TornadoContext):
             self.io_loop.add_callback(partial(asyncMethod, self.stop))
             return self.wait()
 
-        def andHaveTheCorrectResult(self, topic):
+        def and_have_the_correct_result(self, topic):
             expect(topic).to_equal("Pseudo Async Result")
 ```
 
