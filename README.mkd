@@ -11,6 +11,8 @@ Vows.Context, like this:
 
 ```python
 import tornado
+from tornado_pyvows import TornadoHTTPContext
+from pyvows import Vows, expect
 
 class HomeHandler(tornado.web.RequestHandler):
     
@@ -20,7 +22,6 @@ class HomeHandler(tornado.web.RequestHandler):
     def post(self):
         self.write("hello_world")
 
-from pyvows import Context, expect
 
 @Vows.batch
 class SomeVows(TornadoHTTPContext):
