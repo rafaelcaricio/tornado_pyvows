@@ -27,6 +27,10 @@ tornado_pyvows are pyvows extensions to tornado web framework.
     #Contributors
     #contributor = 'Bernardo Heynemann',
     #contributor_email = 'heynemann@gmail.com',
+    #contributor = 'Daniel Truemper',
+    #contributor_email = 'truemped@googlemail.com',
+    #contributor = 'Norman Rosner',
+    #contributor_email = 'norman@rosner.io',
     url = 'https://github.com/rafaelcaricio/tornado_pyvows',
     license = 'MIT',
     classifiers = ['Development Status :: 3 - Alpha',
