@@ -74,6 +74,7 @@ class AsyncVows(TornadoContext):
     class CallbacksShouldWork(TornadoContext):
 
         def topic(self):
+            self.io_loop = self.get_new_ioloop()
             self.io_loop.add_callback(partial(asyncMethod, self.stop))
             return self.wait()
 
@@ -91,4 +92,5 @@ The team behind Tornado_pyVows (in order of joining the project):
  - Rafael Carício [@rafaelcaricio](https://github.com/rafaelcaricio)
  - Bernardo Heynemann [@heynemann](https://github.com/heynemann)
  - Daniel Truemper [@truemped](https://github.com/truemped)
+ - Norman Rosner [@rosner](https://github.com/rosner)
 
