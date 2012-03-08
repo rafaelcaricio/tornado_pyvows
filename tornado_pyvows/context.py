@@ -128,11 +128,10 @@ class TornadoContext(Vows.Context, AsyncTestCase, ParentAttributeMixin):
         ParentAttributeMixin.__init__(self)
         AsyncTestCase(*args, **kwargs)
 
-        self.ignore('get_parent_argument',
+        super(TornadoContext, self).ignore( 'get_parent_argument',
                     'get_app', 'fetch', 'get_httpserver_options',
                     'get_url',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait')
-
 
 class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
 
@@ -141,7 +140,7 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         ParentAttributeMixin.__init__(self)
         AsyncHTTPTestCase.__init__(self, *args, **kwargs)
 
-        self.ignore('get_parent_argument',
+        super(TornadoHTTPContext, self).ignore( 'get_parent_argument',
                     'get_app', 'fetch', 'get_httpserver_options',
                     'get_url',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait',

@@ -23,6 +23,7 @@ class AsyncVows(TornadoContext):
     class CallbacksShouldWork(TornadoContext):
 
         def topic(self):
+            self.io_loop = self.get_new_ioloop()
             self.io_loop.add_callback(partial(asyncMethod, self.stop))
             return self.wait()
 
