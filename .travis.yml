@@ -1,6 +1,9 @@
 language: python
 python:
   - "2.7"
-before_install: sudo apt-get install -y libevent-1.4-2
-install: pip install -r requirements.txt --use-mirrors
-script: make test
+before_install:
+    sudo apt-get install -y python-gevent python-lxml
+install:
+    pip install -r requirements.txt --use-mirrors
+script:
+    make test
