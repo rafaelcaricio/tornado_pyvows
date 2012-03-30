@@ -9,8 +9,6 @@
 # Copyright (c) 2011 Rafael Caricio rafael@caricio.com
 
 import sys
-import os
-import logging
 import time
 import contextlib
 import urllib
