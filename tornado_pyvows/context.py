@@ -79,14 +79,23 @@ class AsyncHTTPTestCase(AsyncTestCase):
 
         self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
         if 'get_app' in dir(self.__class__):
+            # the app needs its own io loop
             self.io_loop = self.get_new_ioloop()
             self.port = get_unused_port()
             self.app = self.get_app()
             self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
                                           **self.get_httpserver_options())
             self.http_server.listen(self.port)
+        else:
+            # if we don't test handlers use the clients io loop
+            self.io_loop = self.http_client.io_loop
 
     def fetch(self, path, **kwargs):
+        """ 
+        Simple wrapper around ``http_client``. If the given ``path`` doesn't
+        start with 'http' than ``path`` is passed on to the 
+        ``http_client.fetch``
+        """
         self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
         return self.wait()
 
@@ -94,8 +103,9 @@ class AsyncHTTPTestCase(AsyncTestCase):
         return {}
 
     def get_url(self, path):
-        url = 'http://localhost:%s%s' % (self.port, path)
-        return url
+        if not path.startswith('http'):
+            return  'http://localhost:%s%s' % (self.port, path)
+        return path
 
     def teardown(self):
         if 'http_server' in dir(self.__class__):
@@ -144,7 +154,7 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
                     'get_app', 'fetch', 'get_httpserver_options',
                     'get_url',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait',
-                    'get', 'post')
+                    'get', 'post', 'delete', 'head', 'put')
 
     def setup(self):
         AsyncHTTPTestCase.setup(self)
@@ -152,10 +162,19 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
     def teardown(self):
         AsyncHTTPTestCase.teardown(self)
 
-    def get(self, path):
-        return self.fetch(path, method="GET")
+    def get(self, path, **kwargs):
+        return self.fetch(path, method="GET", **kwargs)
 
-    def post(self, path, data={}, multipart=False):
+    def delete(self, path, **kwargs):
+        return self.fetch(path, method="DELETE")
+
+    def put(self, path, **kwargs):
+        return self.fetch(path, method="PUT", **kwargs)
+
+    def head(self, path, **kwargs):
+        return self.fetch(path, method="DELETE", **kwargs)
+
+    def post(self, path, data={}, multipart=False, **kwargs):
         """
         Convenience wrapper for the ``http_client``.
 
@@ -173,4 +192,8 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         else:
             body = urllib.urlencode(data, doseq=True)
 
-        return self.fetch(path, method="POST", body=body, headers=headers)
+        if 'headers' in kwargs:
+            kwargs['headers'].update(headers)
+
+        return self.fetch(path, method="POST", body=body, headers=headers, 
+                **kwargs)
