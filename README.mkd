@@ -62,6 +62,10 @@ class SomeVows(TornadoHTTPContext):
 Each `TornadoHTTPContext` provides Tornado's testing methods like
 `http_client`, `get_url`, `stop`, `wait`, `fetch` and others. 
 
+If you're developing based on Tornados HTTPClient you can just do that with simple 
+wrappers as seen in 
+[client_vows.py](https://github.com/rosner/tornado_pyvows/blob/master/vows/client_vows.py)
+
 TornadoContext
 --------------
 
