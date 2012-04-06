@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Tornado pyvows by rafaelcaricio</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Tornado pyvows</h1>
+        <p>This project contains extensions to test Tornado apps under pyvows.</p>
+        <p class="view"><a href="https://github.com/rafaelcaricio/tornado_pyvows">View the Project on GitHub <small>rafaelcaricio/tornado_pyvows</small></a></p>
+        <ul>
+          <li><a href="https://github.com/rafaelcaricio/tornado_pyvows/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/rafaelcaricio/tornado_pyvows/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/rafaelcaricio/tornado_pyvows">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><a href="http://travis-ci.org/rosner/tornado_pyvows"><img src="https://secure.travis-ci.org/rosner/tornado_pyvows.png?branch=master" alt="Build
+Status"></a></p>
+
+<h1>Tornado_pyVows</h1>
+
+<p>This project contains extensions to test Tornado apps under pyVows.</p>
+
+<h2>TornadoHTTPContext</h2>
+
+<p>To test a tornado app (or handlers) use this context instead of the regular
+Vows.Context, like this:</p>
+
+<div class="highlight">
+<pre><span class="kn">import</span> <span class="nn">tornado</span>
+<span class="kn">from</span> <span class="nn">tornado_pyvows</span> <span class="kn">import</span> <span class="n">TornadoHTTPContext</span>
+<span class="kn">from</span> <span class="nn">pyvows</span> <span class="kn">import</span> <span class="n">Vows</span><span class="p">,</span> <span class="n">expect</span>
+
+<span class="k">class</span> <span class="nc">HomeHandler</span><span class="p">(</span><span class="n">tornado</span><span class="o">.</span><span class="n">web</span><span class="o">.</span><span class="n">RequestHandler</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">"hello_world"</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">"hello_world"</span><span class="p">)</span>
+
+
+<span class="nd">@Vows.batch</span>
+<span class="k">class</span> <span class="nc">SomeVows</span><span class="p">(</span><span class="n">TornadoHTTPContext</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">get_app</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="n">tornado</span><span class="o">.</span><span class="n">web</span><span class="o">.</span><span class="n">Application</span><span class="p">([</span>
+            <span class="p">(</span><span class="s">r"/"</span><span class="p">,</span> <span class="n">HomeHandler</span><span class="p">),</span>
+        <span class="p">])</span>
+        <span class="k">return</span> <span class="n">application</span>
+
+    <span class="k">class</span> <span class="nc">HomeUrl</span><span class="p">(</span><span class="n">TornadoHTTPContext</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">topic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">http_client</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_url</span><span class="p">(</span><span class="s">'/'</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span>
+
+        <span class="k">def</span> <span class="nf">should_be_hello_world</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">):</span>
+            <span class="n">expect</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span><span class="o">.</span><span class="n">to_equal</span><span class="p">(</span><span class="s">"hello_world"</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">SameUrl</span><span class="p">(</span><span class="n">HomeUrl</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">topic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="sd">"""</span>
+<span class="sd">            For convenience you can also use ``get`` and ``post`` to wrap the </span>
+<span class="sd">            calls to the ``http_client``.</span>
+<span class="sd">            """</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span>
+
+    <span class="k">class</span> <span class="nc">SimplePost</span><span class="p">(</span><span class="n">HomeUrl</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">topic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span>
+</pre>
+</div>
+
+
+<p>Each <code>TornadoHTTPContext</code> provides Tornado's testing methods like
+<code>http_client</code>, <code>get_url</code>, <code>stop</code>, <code>wait</code>, <code>fetch</code> and others. </p>
+
+<p>If you're developing based on Tornados HTTPClient you can just do that with simple 
+wrappers as seen in 
+<a href="https://github.com/rosner/tornado_pyvows/blob/master/vows/client_vows.py">client_vows.py</a></p>
+
+<h2>TornadoContext</h2>
+
+<p>If you want to test a tornado based app without the HTTP overhead you may also
+use the <code>TornadoContext</code>:</p>
+
+<div class="highlight">
+<pre><span class="k">def</span> <span class="nf">asyncMethod</span><span class="p">(</span><span class="n">callback</span><span class="p">):</span>
+    <span class="n">callback</span><span class="p">(</span><span class="s">"Pseudo Async Result"</span><span class="p">)</span>
+
+<span class="nd">@Vows.batch</span>
+<span class="k">class</span> <span class="nc">AsyncVows</span><span class="p">(</span><span class="n">TornadoContext</span><span class="p">):</span>
+
+    <span class="k">class</span> <span class="nc">CallbacksShouldWork</span><span class="p">(</span><span class="n">TornadoContext</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">topic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">io_loop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_new_ioloop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">io_loop</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">asyncMethod</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">and_have_the_correct_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topic</span><span class="p">):</span>
+            <span class="n">expect</span><span class="p">(</span><span class="n">topic</span><span class="p">)</span><span class="o">.</span><span class="n">to_equal</span><span class="p">(</span><span class="s">"Pseudo Async Result"</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<h1>Contributors</h1>
+
+<p>Contributions are very welcome. To contribute fork it and create a pull request.</p>
+
+<p>The team behind Tornado_pyVows (in order of joining the project):</p>
+
+<ul>
+<li>Rafael Carício <a href="https://github.com/rafaelcaricio">@rafaelcaricio</a>
+</li>
+<li>Bernardo Heynemann <a href="https://github.com/heynemann">@heynemann</a>
+</li>
+<li>Daniel Truemper <a href="https://github.com/truemped">@truemped</a>
+</li>
+<li>Norman Rosner <a href="https://github.com/rosner">@rosner</a>
+</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/rafaelcaricio">rafaelcaricio</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>
