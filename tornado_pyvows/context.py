@@ -18,6 +18,7 @@ from tornado.httpclient import AsyncHTTPClient
 from tornado.httpserver import HTTPServer
 from tornado.stack_context import NullContext
 from tornado.testing import get_unused_port
+from tornado.web import Application, URLSpec
 from pyvows import Vows
 
 from urllib3.filepost import encode_multipart_formdata
@@ -79,18 +80,37 @@ class AsyncHTTPTestCase(AsyncTestCase):
         self.failure = None
         self.stop_args = None
 
+        self.io_loop = self.get_new_ioloop()
         self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
-        if 'get_app' in dir(self.__class__):
-            # the app needs its own io loop
-            self.io_loop = self.get_new_ioloop()
-            self.port = get_unused_port()
+
+        if hasattr(self, 'get_app') and self.get_app:
             self.app = self.get_app()
+        elif hasattr(self, 'get_handler_spec') and self.get_handler_spec:
+            spec = self.get_handler_spec()
+            if spec:
+                if isinstance(spec, tuple):
+                    if len(spec) == 3:
+                        (pattern, handler, kwargs) = spec
+                    elif len(spec) == 2:
+                        (pattern, handler) = spec
+                        kwargs = {}
+                elif isinstance(spec, URLSpec):
+                    pattern = spec.regex.pattern
+                    handler = spec.handler_class
+                    kwargs = spec.kwargs
+
+                # create an isolated version of the handler
+                self.isolated_handler = type('IsolatedHandler', (handler,), {})
+
+                self.app = Application([
+                    (pattern, self.isolated_handler, kwargs)
+                ], self.get_application_settings())
+
+        if self.app:
+            self.port = get_unused_port()
             self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
-                                          **self.get_httpserver_options())
+                                            **self.get_httpserver_options())
             self.http_server.listen(self.port)
-        else:
-            # if we don't test handlers use the clients io loop
-            self.io_loop = self.http_client.io_loop
 
     def fetch(self, path, **kwargs):
         """
@@ -156,15 +176,25 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
 
         super(TornadoHTTPContext, self).ignore( 'get_parent_argument',
                     'get_app', 'fetch', 'get_httpserver_options',
-                    'get_url',
-                    'get_new_ioloop', 'stack_context', 'stop', 'wait',
-                    'get', 'post', 'delete', 'head', 'put')
+                    'get_url', 'get_new_ioloop', 'stack_context', 'stop',
+                    'wait', 'get', 'post', 'delete', 'head', 'put',
+                    'get_handler_spec', 'get_application_settings',
+                    'get_test_handler')
 
     def setup(self):
         AsyncHTTPTestCase.setup(self)
 
     def teardown(self):
         AsyncHTTPTestCase.teardown(self)
+
+    def get_handler_spec(self):
+        return None
+
+    def get_application_settings(self):
+        return None
+
+    def get_test_handler(self):
+        return self.isolated_handler
 
     def get(self, path, **kwargs):
         return self.fetch(path, method="GET", **kwargs)
@@ -201,3 +231,12 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
 
         return self.fetch(path, method="POST", body=body, headers=headers,
                 **kwargs)
+
+
+class IsolatedTornadoHTTPContext(TornadoHTTPContext):
+
+    def get_handler_spec(self):
+        return self.get_parent_argument('get_handler_spec')()
+
+    def get_application_settings(self):
+        return self.get_parent_argument('get_application_settings')()

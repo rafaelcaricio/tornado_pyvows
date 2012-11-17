@@ -14,6 +14,10 @@ from imp import load_source
 
 version = load_source('version', os.path.join("tornado_pyvows", "version.py"))
 
+
+tests_require = ['mock']
+
+
 setup(
     name = 'tornado_pyvows',
     version = '.'.join([str(item) for item in version.__version__]),
@@ -45,6 +49,10 @@ tornado_pyvows are pyvows extensions to tornado web framework.
     packages = ['tornado_pyvows'],
     package_dir = {"tornado_pyvows": "tornado_pyvows"},
 
+    tests_require = tests_require,
+    extras_require = {
+        'test': tests_require,
+    },
     install_requires=[
         "pyvows",
         "tornado",
@@ -53,5 +61,3 @@ tornado_pyvows are pyvows extensions to tornado web framework.
     ],
 
 )
-
-

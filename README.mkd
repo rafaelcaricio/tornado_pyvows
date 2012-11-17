@@ -64,7 +64,63 @@ Each `TornadoHTTPContext` provides Tornado's testing methods like
 
 If you're developing based on Tornados HTTPClient you can just do that with simple 
 wrappers as seen in 
-[client_vows.py](https://github.com/rosner/tornado_pyvows/blob/master/vows/client_vows.py)
+[client_vows.py](https://github.com/rafaelcaricio/tornado_pyvows/blob/master/vows/client_vows.py)
+
+
+IsolatedTornadoHTTPContext
+--------------------------
+
+The new `IsolatedTornadoHTTPContext` creates a new `HTTPServer` that runs the
+application. This helps when testing handlers using mocks, e.g.::
+
+```python
+@Vows.batch
+class ASimpleTestWithAMock(TornadoHTTPContext):
+
+    def get_handler_spec(self):
+        """..."""
+        return (r'^/echo$', ExampleHandler)
+
+    def get_application_settings(self):
+        return {'debug': True}
+
+    class AndASimpleTestCase(IsolatedTornadoHTTPContext):
+
+        def topic(self):
+            mock = AsyncMock()
+            mock.return_value = 'mocked echo'
+            self.get_test_handler().echo = mock
+
+            yield (mock, self.fetch('/echo'))
+
+        def shouldWorkAsUsual(self, topic):
+            expect(topic).Not.to_be_an_error()
+
+        def shouldReturnTheExpectedTopic(self, topic):
+            (_, resp) = topic
+            expect(resp.body).to_equal('mocked echo')
+
+        class ThatBlahsBlahs(TornadoHTTPContext):
+
+            def topic(self, topic):
+                yield (topic, self.fetch('/echo'))
+
+            def shouldReturnTheExpectedTopic(self, topic):
+                (_, resp) = topic
+                expect(resp.body).to_equal('mocked echo')
+
+    class ThatHasNoSideEffects(IsolatedTornadoHTTPContext):
+
+        def topic(self):
+            yield self.fetch('/echo')
+
+        def shouldWorkAsUsual(self, topic):
+            expect(topic).Not.to_be_an_error()
+
+        def shouldReturnTheExpectedTopic(self, resp):
+            expect(resp.body).to_equal('echo')
+```
+
 
 TornadoContext
 --------------
