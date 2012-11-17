@@ -22,6 +22,7 @@ from pyvows import Vows
 
 from urllib3.filepost import encode_multipart_formdata
 
+
 class AsyncTestCase(object):
 
     def get_new_ioloop(self):
@@ -70,6 +71,7 @@ class AsyncTestCase(object):
         self.stop_args = None
         return result
 
+
 class AsyncHTTPTestCase(AsyncTestCase):
     def setup(self):
         self.stopped = False
@@ -91,9 +93,9 @@ class AsyncHTTPTestCase(AsyncTestCase):
             self.io_loop = self.http_client.io_loop
 
     def fetch(self, path, **kwargs):
-        """ 
+        """
         Simple wrapper around ``http_client``. If the given ``path`` doesn't
-        start with 'http' than ``path`` is passed on to the 
+        start with 'http' than ``path`` is passed on to the
         ``http_client.fetch``
         """
         self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
@@ -112,6 +114,7 @@ class AsyncHTTPTestCase(AsyncTestCase):
             self.http_server.stop()
         if 'http_client' in dir(self.__class__):
             self.http_client.close()
+
 
 class ParentAttributeMixin(object):
 
@@ -142,6 +145,7 @@ class TornadoContext(Vows.Context, AsyncTestCase, ParentAttributeMixin):
                     'get_app', 'fetch', 'get_httpserver_options',
                     'get_url',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait')
+
 
 class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
 
@@ -181,7 +185,7 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         :param multipart:
             If True the given ``data`` is encoded "multipart/form-data" through
             ``urllib3``
-            If the value is a tuple of two elements, then the first element is 
+            If the value is a tuple of two elements, then the first element is
             treated as the filename of the form-data section.
         """
         body = None
@@ -195,5 +199,5 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         if 'headers' in kwargs:
             kwargs['headers'].update(headers)
 
-        return self.fetch(path, method="POST", body=body, headers=headers, 
+        return self.fetch(path, method="POST", body=body, headers=headers,
                 **kwargs)
