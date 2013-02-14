@@ -14,8 +14,11 @@ from pyvows import Vows, expect
 
 REQUESTBIN_BASE_URL = 'http://requestb.in'
 
+
 @Vows.batch
 class Post(TornadoHTTPContext):
+    def setup(self):
+        self.initialize_ioloop()
 
     def topic(self):
         response = self.post('%s/api/v1/bins' % REQUESTBIN_BASE_URL)
@@ -31,9 +34,10 @@ class Post(TornadoHTTPContext):
         def topic(self, post_response):
             requestbin_id, response = post_response
             get_response = self.get(
-                    '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id))
+                '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id)
+            )
             return get_response
-        
+
         def should_be_ok(self, topic):
             expect(topic.code).to_equal(200)
 
@@ -42,7 +46,8 @@ class Post(TornadoHTTPContext):
         def topic(self, post_response):
             requestbin_id, response = post_response
             delete_response = self.delete(
-                    '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id))
+                '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id)
+            )
             return delete_response
 
         def should_be_ok(self, topic):
@@ -53,7 +58,8 @@ class Post(TornadoHTTPContext):
         def topic(self, post_response):
             requestbin_id, response = post_response
             head_response = self.head(
-                    '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id))
+                '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id)
+            )
             return head_response
 
         def should_be_ok(self, topic):
@@ -64,7 +70,8 @@ class Post(TornadoHTTPContext):
         def topic(self, post_response):
             requestbin_id, response = post_response
             put_response = self.put(
-                    '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id), body='')
+                '%s/%s' % (REQUESTBIN_BASE_URL, requestbin_id), body=''
+            )
             return put_response
 
         def should_be_ok(self, topic):

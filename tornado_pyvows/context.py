@@ -74,16 +74,18 @@ class AsyncTestCase(object):
 
 
 class AsyncHTTPTestCase(AsyncTestCase):
+    def initialize_ioloop(self):
+        self.io_loop = self.get_new_ioloop()
+        self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
+
     def setup(self):
         self.stopped = False
         self.running = False
         self.failure = None
         self.stop_args = None
 
-        self.io_loop = self.get_new_ioloop()
-        self.http_client = AsyncHTTPClient(io_loop=self.io_loop)
-
-        if hasattr(self, 'get_app') and self.get_app:
+        if 'get_app' in dir(self.__class__):
+            self.initialize_ioloop()
             self.app = self.get_app()
         elif hasattr(self, 'get_handler_spec') and self.get_handler_spec:
             spec = self.get_handler_spec()
@@ -102,6 +104,8 @@ class AsyncHTTPTestCase(AsyncTestCase):
                 # create an isolated version of the handler
                 self.isolated_handler = type('IsolatedHandler', (handler,), {})
 
+                self.initialize_ioloop()
+
                 self.app = Application([
                     (pattern, self.isolated_handler, kwargs)
                 ], self.get_application_settings())
@@ -110,7 +114,7 @@ class AsyncHTTPTestCase(AsyncTestCase):
             self.port = get_unused_port()
             self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
                                             **self.get_httpserver_options())
-            self.http_server.listen(self.port)
+            self.http_server.listen(self.port, address="0.0.0.0")
 
     def fetch(self, path, **kwargs):
         """
@@ -163,7 +167,7 @@ class TornadoContext(Vows.Context, AsyncTestCase, ParentAttributeMixin):
 
         super(TornadoContext, self).ignore( 'get_parent_argument',
                     'get_app', 'fetch', 'get_httpserver_options',
-                    'get_url',
+                    'get_url', 'initialize_ioloop',
                     'get_new_ioloop', 'stack_context', 'stop', 'wait')
 
 
@@ -179,7 +183,7 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
                     'get_url', 'get_new_ioloop', 'stack_context', 'stop',
                     'wait', 'get', 'post', 'delete', 'head', 'put',
                     'get_handler_spec', 'get_application_settings',
-                    'get_test_handler')
+                    'get_test_handler', 'initialize_ioloop')
 
     def setup(self):
         AsyncHTTPTestCase.setup(self)
