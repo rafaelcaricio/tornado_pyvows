@@ -51,8 +51,9 @@ class AsyncTestCase(object):
                 def timeout_func():
                     try:
                         raise AssertionError(
-                          'Async operation timed out after %d seconds' %
-                          timeout)
+                            'Async operation timed out after %d seconds' %
+                            timeout
+                        )
                     except:
                         self.failure = sys.exc_info()
                     self.stop()
@@ -62,7 +63,7 @@ class AsyncTestCase(object):
                 with NullContext():
                     self.io_loop.start()
                 if (self.failure is not None or
-                    condition is None or condition()):
+                        condition is None or condition()):
                     break
         assert self.stopped
         self.stopped = False
@@ -112,8 +113,11 @@ class AsyncHTTPTestCase(AsyncTestCase):
 
         if self.app:
             self.port = get_unused_port()
-            self.http_server = HTTPServer(self.app, io_loop=self.io_loop,
-                                            **self.get_httpserver_options())
+            self.http_server = HTTPServer(
+                self.app,
+                io_loop=self.io_loop,
+                **self.get_httpserver_options()
+            )
             self.http_server.listen(self.port, address="0.0.0.0")
 
     def fetch(self, path, **kwargs):
@@ -130,7 +134,7 @@ class AsyncHTTPTestCase(AsyncTestCase):
 
     def get_url(self, path):
         if not path.startswith('http'):
-            return  'http://localhost:%s%s' % (self.port, path)
+            return 'http://localhost:%s%s' % (self.port, path)
         return path
 
     def teardown(self):
@@ -165,10 +169,12 @@ class TornadoContext(Vows.Context, AsyncTestCase, ParentAttributeMixin):
         ParentAttributeMixin.__init__(self)
         AsyncTestCase(*args, **kwargs)
 
-        super(TornadoContext, self).ignore( 'get_parent_argument',
-                    'get_app', 'fetch', 'get_httpserver_options',
-                    'get_url', 'initialize_ioloop',
-                    'get_new_ioloop', 'stack_context', 'stop', 'wait')
+        super(TornadoContext, self).ignore(
+            'get_parent_argument',
+            'get_app', 'fetch', 'get_httpserver_options',
+            'get_url', 'initialize_ioloop',
+            'get_new_ioloop', 'stack_context', 'stop', 'wait'
+        )
 
 
 class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
@@ -178,12 +184,14 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         ParentAttributeMixin.__init__(self)
         AsyncHTTPTestCase.__init__(self, *args, **kwargs)
 
-        super(TornadoHTTPContext, self).ignore( 'get_parent_argument',
-                    'get_app', 'fetch', 'get_httpserver_options',
-                    'get_url', 'get_new_ioloop', 'stack_context', 'stop',
-                    'wait', 'get', 'post', 'delete', 'head', 'put',
-                    'get_handler_spec', 'get_application_settings',
-                    'get_test_handler', 'initialize_ioloop')
+        super(TornadoHTTPContext, self).ignore(
+            'get_parent_argument',
+            'get_app', 'fetch', 'get_httpserver_options',
+            'get_url', 'get_new_ioloop', 'stack_context', 'stop',
+            'wait', 'get', 'post', 'delete', 'head', 'put',
+            'get_handler_spec', 'get_application_settings',
+            'get_test_handler', 'initialize_ioloop'
+        )
 
     def setup(self):
         AsyncHTTPTestCase.setup(self)
@@ -233,8 +241,13 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         if 'headers' in kwargs:
             kwargs['headers'].update(headers)
 
-        return self.fetch(path, method="POST", body=body, headers=headers,
-                **kwargs)
+        return self.fetch(
+            path,
+            method="POST",
+            body=body,
+            headers=headers,
+            **kwargs
+        )
 
 
 class IsolatedTornadoHTTPContext(TornadoHTTPContext):
