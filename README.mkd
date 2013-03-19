@@ -146,6 +146,32 @@ class AsyncVows(TornadoContext):
             expect(topic).to_equal("Pseudo Async Result")
 ```
 
+The above example creates a new IOLoop for every test, which is nice. Some libraries add
+callbacks to the `IOLoop.instance()` singleton, such as `tornado.httpclient.AsyncHTTPClient`.
+These libraries can be tested by overloading the `get_new_ioloop` method to return the
+`IOLoop.instance()` singleton.
+
+
+```python
+@Vows.batch
+class AsyncVows(TornadoContext):
+
+    class PyVowsSiteVows(TornadoContext):
+
+        def get_new_ioloop(self):
+            return IOLoop.instance()
+
+        def topic(self):
+            self.io_loop = self.get_new_ioloop()
+            http_client = AsyncHTTPClient()
+            http_client.fetch("http://heynemann.github.com/pyvows/",
+                              self.stop)
+            return self.wait()
+
+        def to_be_about_asynchronous_testing(self, topic):
+            expect(topic.body).to_include('Asynchronous BDD for Python')
+```
+
 Contributors
 ============
 
