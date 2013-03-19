@@ -139,7 +139,7 @@ class AsyncVows(TornadoContext):
 
         def topic(self):
             self.io_loop = self.get_new_ioloop()
-            self.io_loop.add_callback(partial(asyncMethod, self.stop))
+            self.io_loop.add_callback(lambda: asyncMethod(self.stop))
             return self.wait()
 
         def and_have_the_correct_result(self, topic):
