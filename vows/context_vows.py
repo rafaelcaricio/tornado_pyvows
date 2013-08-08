@@ -40,6 +40,10 @@ class Application(TornadoHTTPContext):
             _, _, response = topic
             expect(response.body).to_equal('Hello, world')
 
+    class WhaneHeadRequest(GoodRequest):
+        def topic(self):
+            return (204, None, self.head('/'))
+
     class WhenPostWithUrlEncodedFormData(GoodRequest):
 
         def topic(self):
