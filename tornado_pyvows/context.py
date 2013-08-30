@@ -218,7 +218,7 @@ class TornadoHTTPContext(Vows.Context, AsyncHTTPTestCase, ParentAttributeMixin):
         return self.fetch(path, method="PUT", **kwargs)
 
     def head(self, path, **kwargs):
-        return self.fetch(path, method="DELETE", **kwargs)
+        return self.fetch(path, method="HEAD", **kwargs)
 
     def post(self, path, data={}, multipart=False, **kwargs):
         """

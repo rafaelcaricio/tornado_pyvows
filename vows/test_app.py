@@ -14,6 +14,9 @@ import tornado.web
 from tornado.web import RequestHandler
 
 class MainPageHandler(RequestHandler):
+    def head(self):
+        self.set_status(204)
+
     def get(self):
         self.write("Hello, world")
 
