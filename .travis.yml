@@ -5,6 +5,6 @@ python:
 before_install:
     sudo apt-get install -y libevent-dev python-gevent python-lxml
 install:
-    pip install -r requirements.txt --use-mirrors
+    make setup
 script:
     make test
