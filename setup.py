@@ -54,7 +54,7 @@ tornado_pyvows are pyvows extensions to tornado web framework.
         'test': tests_require,
     },
     install_requires=[
-        "pyvows !=2.0.4, !=2.0.3",
+        "pyvows<=2.0.3",
         "tornado",
         "pycurl",
         "urllib3"
