@@ -27,7 +27,7 @@ from urllib3.filepost import encode_multipart_formdata
 class AsyncTestCase(object):
 
     def get_new_ioloop(self):
-        return tornado.ioloop.IOLoop()
+        return tornado.ioloop.IOLoop.instance()
 
     @contextlib.contextmanager
     def stack_context(self):
