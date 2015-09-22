@@ -13,7 +13,7 @@ from tornado_pyvows import TornadoHTTPContext, IsolatedTornadoHTTPContext
 from tornado import gen
 from tornado.web import RequestHandler, asynchronous
 
-from mock import CallableMixin, NonCallableMock, MagicMixin
+from mock import CallableMixin, NonCallableMock
 
 
 class AsyncCallableMixin(CallableMixin):
@@ -38,10 +38,6 @@ class AsyncMock(AsyncCallableMixin, NonCallableMock):
     pass
 
 
-class AsyncMagicMock(MagicMixin, AsyncMock):
-    pass
-
-
 @Vows.assertion
 def has_been_called_with(mock, *args, **kwargs):
     mock.assert_called_with(*args, **kwargs)
@@ -60,11 +56,6 @@ def has_any_call(mock, *args, **kwargs):
 @Vows.assertion
 def has_calls(mock, calls, any_order=False):
     mock.assert_has_calls(calls, any_order=any_order)
-
-
-@Vows.assertion
-def has_been_called_once(mock):
-    mock.assert_called_once()
 
 
 class ExampleHandler(RequestHandler):
@@ -148,7 +139,7 @@ class ASimpleTestWithAMock(TornadoHTTPContext):
 
         def theMockHasBeenCalledOnce(self, topic):
             (mock, _) = topic
-            expect(mock).has_been_called_once()
+            expect(mock).has_been_called_with()
 
         def thereAreNoMoreActionsOnTheMock(self, topic):
             (mock, _) = topic
