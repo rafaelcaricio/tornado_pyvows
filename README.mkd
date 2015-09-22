@@ -1,5 +1,5 @@
 [![Build
-Status](https://secure.travis-ci.org/rosner/tornado_pyvows.png?branch=master)](http://travis-ci.org/rosner/tornado_pyvows)
+Status](https://secure.travis-ci.org/rafaelcaricio/tornado_pyvows.png?branch=master)](http://travis-ci.org/rosner/tornado_pyvows)
 
 Tornado_pyVows
 ==============
