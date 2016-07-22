@@ -183,4 +183,9 @@ The team behind Tornado_pyVows (in order of joining the project):
  - Bernardo Heynemann [@heynemann](https://github.com/heynemann)
  - Daniel Truemper [@truemped](https://github.com/truemped)
  - Norman Rosner [@rosner](https://github.com/rosner)
+ - Guilherme Souza [@guilhermef](https://github.com/guilhermef)
+ - tarnacious [@tarnacious](https://github.com/tarnacious)
+ - Damien Hardy [@dhardy92](https://github.com/dhardy92)
+ - W. Trevor King [@wking](https://github.com/wking)
+ - [Others](https://github.com/rafaelcaricio/tornado_pyvows/graphs/contributors)
 
